@@ -36,7 +36,7 @@ async function run() {
             res.json(result);
         })
         //delete user  WORKED
-        app.delete('/users/?:id', async (req, res) => {
+        app.delete('/users/:id', async (req, res) => {
 
             const query = { _id: ObjectId(req.params.id) }
             const result = await usersCollection.deleteOne(query);
@@ -69,7 +69,7 @@ async function run() {
             }
         })
 
-        // get user api
+        // get user api WORKED
         app.get('/users', async (req, res) => {
             const cursor = usersCollection.find({});
             const users = await cursor.toArray();
@@ -101,7 +101,7 @@ async function run() {
             }
         })
 
-        // check user role admin or not 
+        // check user role admin or not  WORKED
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email };
