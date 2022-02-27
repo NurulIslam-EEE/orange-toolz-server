@@ -111,7 +111,7 @@ async function run() {
                 isAdmin = true;
             }
             console.log('admin : ', isAdmin);
-            res.json(isAdmin);
+            res.json({ user, isAdmin });
         })
 
 
