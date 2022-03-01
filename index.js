@@ -2,6 +2,10 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const ObjectId = require('mongodb').ObjectId;
 const express = require('express');
 const cors = require('cors');
+const multer = require("multer");
+const fileSchema = require("./schemas/fileSchema");
+const { default: mongoose } = require('mongoose');
+const fileModel = new mongoose.model("file", fileSchema);
 require('dotenv').config();
 
 const app = express();
@@ -10,11 +14,30 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+       const storage = multer.diskStorage({
+    destination: (req, file, callback) => {
+        callback(null, "./uploads")
+    },
+    filename: (req, file, callback) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        callback(null, file.originalname);
+    }
+
+})
+           const uploads = multer({ storage: storage })
+            
+
+
+
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.o0i8x.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-console.log(uri);
-
+// console.log(uri);
+mongoose.connect(uri, {
+    useNewUrlParser: true, useUnifiedTopology: true,
+    dbName: "orange-toolz"
+}).then(() => console.log('connection successful'))
+    .catch((err) => console.log(err))
 
 
 async function run() {
@@ -157,7 +180,25 @@ async function run() {
             res.send(events);
         })
 
+        // file uploads
+        app.post('/uploads', uploads.single("fileName"), async (req, res) => {
+    console.log(req.file)
+            const newFile = new fileModel({
+                name: req.body.name,
+                time:req.body.time,
+                fileName: req.file.filename
+            })
+            
+         const result=await   newFile.save()
+                // .then(() => res.json("new file posted"))
+                // .catch((err) => res.status.json('server error'))
+                res.send(result);
 
+        })
+        app.get('/uploads',async(req,res)=>{
+        const result= await fileModel.find({});
+        res.send(result)
+        })
         console.log('database connected');
     }
     finally {
