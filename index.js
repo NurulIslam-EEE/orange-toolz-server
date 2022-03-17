@@ -14,7 +14,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-       const storage = multer.diskStorage({
+const storage = multer.diskStorage({
     destination: (req, file, callback) => {
         callback(null, "./uploads")
     },
@@ -24,8 +24,8 @@ app.use(express.json());
     }
 
 })
-           const uploads = multer({ storage: storage })
-            
+const uploads = multer({ storage: storage })
+
 
 
 
@@ -47,7 +47,22 @@ async function run() {
         const usersCollection = database.collection('users');
         const eventsCollection = database.collection('events');
         const donorsCollection = database.collection('donors');
+        const newsCollection = database.collection('news');
+        // Brainzet
 
+        app.post('/news', async (req, res) => {
+            const user = req.body;
+
+            const result = await newsCollection.insertOne(user);
+            console.log('new user data saved');
+            res.json(result);
+        })
+        app.get('/news', async (req, res) => {
+            const cursor = newsCollection.find({});
+            const users = await cursor.toArray();
+            console.log('Users found');
+            res.send(users);
+        })
 
         // save user api worked
         app.post('/users', async (req, res) => {
@@ -182,22 +197,22 @@ async function run() {
 
         // file uploads
         app.post('/uploads', uploads.single("fileName"), async (req, res) => {
-    console.log(req.file)
+            console.log(req.file)
             const newFile = new fileModel({
                 name: req.body.name,
-                time:req.body.time,
+                time: req.body.time,
                 fileName: req.file.filename
             })
-            
-         const result=await   newFile.save()
-                // .then(() => res.json("new file posted"))
-                // .catch((err) => res.status.json('server error'))
-                res.send(result);
+
+            const result = await newFile.save()
+            // .then(() => res.json("new file posted"))
+            // .catch((err) => res.status.json('server error'))
+            res.send(result);
 
         })
-        app.get('/uploads',async(req,res)=>{
-        const result= await fileModel.find({});
-        res.send(result)
+        app.get('/uploads', async (req, res) => {
+            const result = await fileModel.find({});
+            res.send(result)
         })
         console.log('database connected');
     }
@@ -211,7 +226,7 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('It is a team project!')
+    res.send('Orange Toolz')
 })
 
 app.listen(port, () => {
